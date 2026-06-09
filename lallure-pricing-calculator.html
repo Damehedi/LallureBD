@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Allure Product Pricing Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --ink:#0a0a0f;
+    --ink-2:#12121b;
+    --cream:#f4f1ea;
+    --cream-dim:#b9b4a7;
+    --gold:#d8b15a;
+    --gold-soft:#e7cf94;
+    --rose:#c98b7a;
+    --line:rgba(216,177,90,0.18);
+    --glass:rgba(18,18,27,0.55);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--ink);
+    color:var(--cream);
+    font-family:'Inter',system-ui,sans-serif;
+    overflow-x:hidden;
+    min-height:100vh;
+  }
+  #bg{position:fixed;inset:0;z-index:0;display:block}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 0%,rgba(10,10,15,0) 40%,rgba(10,10,15,0.85) 100%)}
+  .wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:56px 24px 80px}
+
+  header{text-align:center;margin-bottom:44px}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.42em;
+    text-transform:uppercase;color:var(--gold);opacity:0.85;margin-bottom:14px}
+  h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(42px,7vw,76px);
+    line-height:0.98;letter-spacing:0.01em}
+  h1 em{font-style:italic;color:var(--gold-soft)}
+  .sub{margin-top:14px;color:var(--cream-dim);font-size:15px;font-weight:400;
+    max-width:520px;margin-left:auto;margin-right:auto;line-height:1.55}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+
+  .panel{background:var(--glass);border:1px solid var(--line);border-radius:18px;
+    padding:28px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .panel-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.28em;
+    text-transform:uppercase;color:var(--gold);margin-bottom:22px;display:flex;
+    align-items:center;gap:10px}
+  .panel-title::before{content:"";width:18px;height:1px;background:var(--gold);opacity:0.6}
+
+  .field{margin-bottom:20px}
+  .field:last-child{margin-bottom:0}
+  label{display:block;font-size:13px;color:var(--cream-dim);margin-bottom:8px;font-weight:500}
+  label .hint{color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:0.1em;margin-left:6px}
+  .input-row{position:relative;display:flex;align-items:center}
+  .input-row .unit{position:absolute;left:14px;font-family:'JetBrains Mono',monospace;
+    font-size:14px;color:var(--gold);pointer-events:none}
+  .input-row.suffix .unit{left:auto;right:14px}
+  input[type=number]{width:100%;background:rgba(244,241,234,0.04);
+    border:1px solid var(--line);border-radius:11px;padding:13px 14px 13px 34px;
+    color:var(--cream);font-family:'JetBrains Mono',monospace;font-size:16px;
+    transition:border-color .2s,background .2s;outline:none}
+  .input-row.suffix input{padding:13px 40px 13px 14px}
+  .input-row.bare input{padding-left:14px}
+  input[type=number]:focus{border-color:var(--gold);background:rgba(216,177,90,0.06)}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{
+    -webkit-appearance:none;margin:0}
+  input[type=number]{-moz-appearance:textfield}
+
+  .results{display:flex;flex-direction:column;gap:2px}
+  .res-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:14px 0;border-bottom:1px solid rgba(244,241,234,0.06)}
+  .res-row:last-child{border-bottom:none}
+  .res-label{font-size:13px;color:var(--cream-dim)}
+  .res-label small{display:block;font-size:10px;font-family:'JetBrains Mono',monospace;
+    letter-spacing:0.08em;color:rgba(185,180,167,0.55);margin-top:3px}
+  .res-val{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--cream);
+    text-align:right;white-space:nowrap}
+
+  .headline-res{background:linear-gradient(135deg,rgba(216,177,90,0.14),rgba(201,139,122,0.08));
+    border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:18px;
+    display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .headline-res .hl-label{font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:0.24em;text-transform:uppercase;color:var(--gold)}
+  .headline-res .hl-main{font-family:'Instrument Serif',serif;font-size:38px;
+    line-height:1;color:var(--gold-soft);margin-top:6px}
+  .headline-res .hl-sub{font-family:'JetBrains Mono',monospace;font-size:13px;
+    color:var(--cream-dim);margin-top:6px}
+
+  .totals{margin-top:18px;padding-top:18px;border-top:1px dashed var(--line)}
+  .totals .res-val{color:var(--gold-soft)}
+
+  .formula{margin-top:24px}
+  .formula details{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .formula summary{cursor:pointer;list-style:none;padding:14px 18px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;
+    text-transform:uppercase;color:var(--gold);display:flex;justify-content:space-between;
+    align-items:center}
+  .formula summary::-webkit-details-marker{display:none}
+  .formula summary .chev{transition:transform .25s}
+  .formula details[open] summary .chev{transform:rotate(180deg)}
+  .formula .body{padding:4px 18px 18px;font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;line-height:1.9;color:var(--cream-dim)}
+  .formula .body .step{display:flex;justify-content:space-between;gap:14px;
+    padding:5px 0;border-bottom:1px solid rgba(244,241,234,0.05)}
+  .formula .body .step:last-child{border-bottom:none}
+  .formula .body .step b{color:var(--cream);font-weight:500}
+  .formula .note{margin-top:14px;padding:12px 14px;border-radius:9px;
+    background:rgba(201,139,122,0.08);border:1px solid rgba(201,139,122,0.25);
+    color:var(--rose);font-family:'Inter',sans-serif;font-size:12px;line-height:1.6}
+
+  footer{text-align:center;margin-top:48px;font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(185,180,167,0.4)}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="vignette"></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Atelier Pricing Engine</div>
+    <h1>L'Allure <em>Pricing</em> Calculator</h1>
+    <p class="sub">Turn a UK supplier price into a landed cost and a margin-backed sell price, in taka and sterling, at a glance.</p>
+  </header>
+
+  <div class="grid">
+    <!-- INPUTS -->
+    <div class="panel">
+      <div class="panel-title">Your inputs</div>
+
+      <div class="field">
+        <label>Item price <span class="hint">GBP · x</span></label>
+        <div class="input-row"><span class="unit">£</span>
+          <input type="number" id="price" value="20" step="0.01" min="0"></div>
+      </div>
+
+      <div class="field">
+        <label>Conversion rate <span class="hint">GBP → BDT</span></label>
+        <div class="input-row bare">
+          <input type="number" id="rate" value="150" step="0.01" min="0" style="padding-left:14px"></div>
+      </div>
+
+      <div class="field">
+        <label>Weight <span class="hint">grams</span></label>
+        <div class="input-row suffix"><span class="unit">g</span>
+          <input type="number" id="weight" value="200" step="1" min="0"></div>
+      </div>
+
+      <div class="field">
+        <label>Quantity <span class="hint">units</span></label>
+        <div class="input-row bare">
+          <input type="number" id="qty" value="1" step="1" min="1" style="padding-left:14px"></div>
+      </div>
+
+      <div class="field">
+        <label>Profit margin <span class="hint">% on cost</span></label>
+        <div class="input-row suffix"><span class="unit">%</span>
+          <input type="number" id="margin" value="40" step="1" min="0"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="panel">
+      <div class="panel-title">Per unit</div>
+      <div class="results">
+        <div class="res-row">
+          <div class="res-label">Cost of product
+            <small>1.5 × (x + 6.5 × kg + 10) × rate</small></div>
+          <div class="res-val" id="cost">৳0</div>
+        </div>
+        <div class="res-row">
+          <div class="res-label">Selling price
+            <small>cost + cost × margin</small></div>
+          <div class="res-val" id="sell">৳0</div>
+        </div>
+      </div>
+
+      <div class="headline-res">
+        <div>
+          <div class="hl-label">Profit per unit</div>
+          <div class="hl-main" id="profitBdt">৳0</div>
+          <div class="hl-sub" id="profitGbp">£0.00</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hl-label">Margin</div>
+          <div class="hl-main" id="marginEcho" style="font-size:30px">40%</div>
+        </div>
+      </div>
+
+      <div class="totals">
+        <div class="panel-title" style="margin-bottom:14px">Order total <span id="qtyEcho" style="color:var(--cream-dim);text-transform:none;letter-spacing:0">× 1</span></div>
+        <div class="results">
+          <div class="res-row"><div class="res-label">Total cost</div><div class="res-val" id="tCost">৳0</div></div>
+          <div class="res-row"><div class="res-label">Total revenue</div><div class="res-val" id="tSell">৳0</div></div>
+          <div class="res-row"><div class="res-label">Total profit (BDT)</div><div class="res-val" id="tProfitBdt">৳0</div></div>
+          <div class="res-row"><div class="res-label">Total profit (GBP)</div><div class="res-val" id="tProfitGbp">£0.00</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="formula">
+    <details>
+      <summary>How this number is built <span class="chev">▾</span></summary>
+      <div class="body">
+        <div class="step"><span>Landed value (GBP) = x + 6.5 × (weight ÷ 1000) + 10</span><b id="fLanded">£0.00</b></div>
+        <div class="step"><span>Buffered ×1.5</span><b id="fBuffered">£0.00</b></div>
+        <div class="step"><span>Cost in BDT = buffered × rate</span><b id="fCost">৳0</b></div>
+        <div class="step"><span>Selling = cost × (1 + margin)</span><b id="fSell">৳0</b></div>
+        <div class="step"><span>Profit BDT = cost × margin</span><b id="fProfitBdt">৳0</b></div>
+        <div class="step"><span>Profit GBP = profit BDT ÷ rate</span><b id="fProfitGbp">£0.00</b></div>
+        <div class="note"><b>Heads up on the flat fees.</b> The £6.5 per kilo shipping and the £10 flat charge are applied per unit, then multiplied by quantity. If the £10 is a once-per-shipment customs or handling fee, your order totals will run high. Adjust the model if that is the case.</div>
+      </div>
+    </details>
+  </div>
+
+  <footer>L'Allure · Client-side · Nothing leaves this page</footer>
+</div>
+
+<script>
+/* ---------- Pricing logic ---------- */
+const $ = id => document.getElementById(id);
+const ids = ['price','rate','weight','qty','margin'];
+
+const bdt = n => '৳' + (isFinite(n) ? Math.round(n).toLocaleString('en-IN') : '0');
+const bdt2 = n => '৳' + (isFinite(n) ? n.toLocaleString('en-IN',{maximumFractionDigits:2}) : '0');
+const gbp = n => '£' + (isFinite(n) ? n.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00');
+
+let currentMargin = 0.4; // drives the gem glow
+
+function calc(){
+  const x = parseFloat($('price').value) || 0;
+  const rate = parseFloat($('rate').value) || 0;
+  const weight = parseFloat($('weight').value) || 0;
+  const qty = Math.max(1, parseFloat($('qty').value) || 1);
+  const marginPct = parseFloat($('margin').value) || 0;
+  const m = marginPct / 100;
+  currentMargin = m;
+
+  const landed = x + 6.5 * (weight / 1000) + 10;     // GBP
+  const buffered = 1.5 * landed;                       // GBP
+  const cost = buffered * rate;                        // BDT
+  const sell = cost + cost * m;                         // BDT
+  const profitBdt = sell - cost;                       // BDT
+  const profitGbp = rate ? profitBdt / rate : 0;       // GBP
+
+  // per unit
+  $('cost').textContent = bdt(cost);
+  $('sell').textContent = bdt(sell);
+  $('profitBdt').textContent = bdt(profitBdt);
+  $('profitGbp').textContent = gbp(profitGbp);
+  $('marginEcho').textContent = marginPct + '%';
+
+  // order totals
+  $('qtyEcho').textContent = '× ' + qty;
+  $('tCost').textContent = bdt(cost * qty);
+  $('tSell').textContent = bdt(sell * qty);
+  $('tProfitBdt').textContent = bdt(profitBdt * qty);
+  $('tProfitGbp').textContent = gbp(profitGbp * qty);
+
+  // breakdown
+  $('fLanded').textContent = gbp(landed);
+  $('fBuffered').textContent = gbp(buffered);
+  $('fCost').textContent = bdt2(cost);
+  $('fSell').textContent = bdt2(sell);
+  $('fProfitBdt').textContent = bdt2(profitBdt);
+  $('fProfitGbp').textContent = gbp(profitGbp);
+}
+ids.forEach(id => $(id).addEventListener('input', calc));
+calc();
+
+/* ---------- 3D ambient background ---------- */
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canvas = $('bg');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0a0a0f, 0.045);
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
+camera.position.z = 14;
+
+// lights
+scene.add(new THREE.AmbientLight(0x404048, 0.6));
+const key = new THREE.PointLight(0xe7cf94, 2.2, 60); key.position.set(8,10,12); scene.add(key);
+const rim = new THREE.PointLight(0xc98b7a, 1.4, 60); rim.position.set(-12,-6,8); scene.add(rim);
+
+// drifting faceted shards
+const shards = [];
+const shardGeoms = [
+  new THREE.IcosahedronGeometry(1, 0),
+  new THREE.OctahedronGeometry(1, 0),
+  new THREE.TetrahedronGeometry(1.1, 0)
+];
+const shardMat = () => new THREE.MeshStandardMaterial({
+  color:0xd8b15a, metalness:0.85, roughness:0.35,
+  emissive:0x3a2c10, emissiveIntensity:0.4, flatShading:true,
+  transparent:true, opacity:0.92
+});
+for(let i=0;i<14;i++){
+  const g = shardGeoms[i % shardGeoms.length];
+  const mesh = new THREE.Mesh(g, shardMat());
+  const s = 0.4 + Math.random()*1.1;
+  mesh.scale.setScalar(s);
+  mesh.position.set((Math.random()-0.5)*26,(Math.random()-0.5)*16,(Math.random()-0.5)*10 - 4);
+  mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+  mesh.userData = {
+    rx:(Math.random()-0.5)*0.004, ry:(Math.random()-0.5)*0.004,
+    fy:0.15+Math.random()*0.25, ph:Math.random()*Math.PI*2, base:mesh.position.y
+  };
+  scene.add(mesh); shards.push(mesh);
+}
+
+// hero gem: a faceted jewel that brightens with profit margin
+const gem = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(2.1, 0),
+  new THREE.MeshStandardMaterial({
+    color:0xe7cf94, metalness:0.95, roughness:0.18,
+    emissive:0xd8b15a, emissiveIntensity:0.5, flatShading:true
+  })
+);
+gem.position.set(0, 0, -1);
+scene.add(gem);
+const gemGlow = new THREE.PointLight(0xe7cf94, 0, 30);
+gemGlow.position.set(0,0,2); scene.add(gemGlow);
+
+let t = 0, gemEase = 0.5;
+function animate(){
+  t += 0.01;
+  shards.forEach(m=>{
+    m.rotation.x += m.userData.rx;
+    m.rotation.y += m.userData.ry;
+    m.position.y = m.userData.base + Math.sin(t*m.userData.fy + m.userData.ph)*0.6;
+  });
+  // gem responds to margin: more margin -> brighter, faster spin
+  const target = Math.min(currentMargin, 1.2);
+  gemEase += (target - gemEase) * 0.05;
+  gem.rotation.y += 0.003 + gemEase*0.01;
+  gem.rotation.x = Math.sin(t*0.3)*0.15;
+  gem.material.emissiveIntensity = 0.4 + gemEase*1.6;
+  gemGlow.intensity = gemEase*3.2;
+  camera.position.x = Math.sin(t*0.1)*0.6;
+  camera.position.y = Math.cos(t*0.08)*0.4;
+  camera.lookAt(0,0,-1);
+  renderer.render(scene, camera);
+  if(!reduce) requestAnimationFrame(animate);
+}
+if(reduce){ gemEase = currentMargin; renderer.render(scene,camera); }
+else animate();
+
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
