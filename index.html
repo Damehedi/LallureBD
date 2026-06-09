@@ -3,365 +3,813 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>L'Allure Product Pricing Calculator</title>
+<title>L'ALLURÉE · Workspace</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232a251d'/%3E%3Cg fill='none' stroke='%23c4a060' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M37 20C29 27 26 38 29 47 30 52 28 55 26 58 24 61 26 64 30 64 30 69 33 74 40 76'/%3E%3Cpath d='M29 47C32 47 35 48 36 51'/%3E%3Cpath d='M63 38C58 34 51 34 48 41 45 47 48 54 55 55 62 56 68 50 66 43 64 37 58 34 53 36'/%3E%3Cpath d='M57 44C55 42 51 43 50 47 49 50 52 52 56 51 60 50 60 45 57 44'/%3E%3Cpath d='M66 43C71 41 76 45 77 51 78 57 73 63 67 62'/%3E%3Cpath d='M55 55C54 62 56 67 62 70 67 73 73 70 75 65'/%3E%3Cpath d='M62 70C61 76 59 80 57 84'/%3E%3Cpath d='M59 76C64 75 68 78 70 82'/%3E%3Cpath d='M58 80C53 80 49 82 47 86'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  :root{
-    --ink:#0a0a0f;
-    --ink-2:#12121b;
-    --cream:#f4f1ea;
-    --cream-dim:#b9b4a7;
-    --gold:#d8b15a;
-    --gold-soft:#e7cf94;
-    --rose:#c98b7a;
-    --line:rgba(216,177,90,0.18);
-    --glass:rgba(18,18,27,0.55);
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    background:var(--ink);
-    color:var(--cream);
-    font-family:'Inter',system-ui,sans-serif;
-    overflow-x:hidden;
-    min-height:100vh;
-  }
-  #bg{position:fixed;inset:0;z-index:0;display:block}
-  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
-    background:radial-gradient(120% 90% at 50% 0%,rgba(10,10,15,0) 40%,rgba(10,10,15,0.85) 100%)}
-  .wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:56px 24px 80px}
+:root{
+  --paper:#f7f3ea;--paper-2:#fffdf8;--ink:#2a251d;--ink-soft:#6f675a;
+  --gold:#b08d4f;--gold-deep:#9a7838;--gold-soft:#cbb07a;
+  --line:rgba(176,141,79,0.22);--line-soft:rgba(42,37,29,0.08);
+  --rose:#a9603f;--shadow:0 20px 54px -28px rgba(42,37,29,0.38);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:400}
+a{color:var(--gold-deep);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
 
-  header{text-align:center;margin-bottom:44px}
-  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.42em;
-    text-transform:uppercase;color:var(--gold);opacity:0.85;margin-bottom:14px}
-  h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(42px,7vw,76px);
-    line-height:0.98;letter-spacing:0.01em}
-  h1 em{font-style:italic;color:var(--gold-soft)}
-  .sub{margin-top:14px;color:var(--cream-dim);font-size:15px;font-weight:400;
-    max-width:520px;margin-left:auto;margin-right:auto;line-height:1.55}
+/* ── INNER PAGES background ── */
+.page-bg{background:radial-gradient(140% 110% at 50% -8%,#fffdf8 0%,var(--paper) 52%,#ece6d5 100%) fixed;min-height:100vh}
 
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
-  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold);
+  background:linear-gradient(180deg,#c4a060,#9a7838);color:#fffdf6;
+  padding:11px 22px;border-radius:10px;font-size:13.5px;font-weight:500;letter-spacing:0.03em;
+  transition:transform .12s,box-shadow .18s;box-shadow:0 8px 22px -10px rgba(154,120,56,0.65)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px -10px rgba(154,120,56,0.8)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent;color:var(--gold-deep);box-shadow:none;border-color:var(--line)}
+.btn.ghost:hover{background:rgba(176,141,79,0.08)}
+.btn.danger{background:transparent;border-color:rgba(169,96,63,0.4);color:var(--rose);box-shadow:none}
+.btn.danger:hover{background:rgba(169,96,63,0.07)}
+.btn.sm{padding:7px 14px;font-size:12px;border-radius:8px}
+.btn:disabled{opacity:0.38;cursor:not-allowed;transform:none!important}
 
-  .panel{background:var(--glass);border:1px solid var(--line);border-radius:18px;
-    padding:28px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-  .panel-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.28em;
-    text-transform:uppercase;color:var(--gold);margin-bottom:22px;display:flex;
-    align-items:center;gap:10px}
-  .panel-title::before{content:"";width:18px;height:1px;background:var(--gold);opacity:0.6}
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 28px;background:rgba(247,243,234,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;cursor:pointer}
+.brand .bmark{width:32px;height:32px;flex:none}
+.brand .wm{font-family:'Cormorant Garamond',serif;font-size:20px;letter-spacing:0.2em;color:var(--ink);line-height:1}
+.brand .tag{font-size:7px;letter-spacing:0.34em;color:var(--gold-deep);text-transform:uppercase;margin-top:3px}
+nav{display:flex;align-items:center;gap:3px}
+nav a{padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--ink-soft);transition:.15s}
+nav a:hover{background:rgba(176,141,79,0.09);color:var(--ink)}
+nav a.active{color:var(--gold-deep);background:rgba(176,141,79,0.12)}
 
-  .field{margin-bottom:20px}
-  .field:last-child{margin-bottom:0}
-  label{display:block;font-size:13px;color:var(--cream-dim);margin-bottom:8px;font-weight:500}
-  label .hint{color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:10px;
-    letter-spacing:0.1em;margin-left:6px}
-  .input-row{position:relative;display:flex;align-items:center}
-  .input-row .unit{position:absolute;left:14px;font-family:'JetBrains Mono',monospace;
-    font-size:14px;color:var(--gold);pointer-events:none}
-  .input-row.suffix .unit{left:auto;right:14px}
-  input[type=number]{width:100%;background:rgba(244,241,234,0.04);
-    border:1px solid var(--line);border-radius:11px;padding:13px 14px 13px 34px;
-    color:var(--cream);font-family:'JetBrains Mono',monospace;font-size:16px;
-    transition:border-color .2s,background .2s;outline:none}
-  .input-row.suffix input{padding:13px 40px 13px 14px}
-  .input-row.bare input{padding-left:14px}
-  input[type=number]:focus{border-color:var(--gold);background:rgba(216,177,90,0.06)}
-  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{
-    -webkit-appearance:none;margin:0}
-  input[type=number]{-moz-appearance:textfield}
+/* ── MAIN ── */
+main{max-width:1000px;margin:0 auto;padding:38px 26px 100px}
+.eyebrow{font-size:10px;letter-spacing:0.36em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:8px}
+.page-head{margin-bottom:28px}
+.page-head h1{font-size:38px;line-height:1.05}
+.page-head p{color:var(--ink-soft);margin-top:6px;max-width:520px}
+.card{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:26px}
+.card+.card{margin-top:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:6px;font-weight:500;letter-spacing:0.02em}
+label .hint{color:var(--gold-deep);font-family:'JetBrains Mono',monospace;font-size:10px;margin-left:5px}
+input,select{width:100%;background:#fffdf8;border:1px solid var(--line);border-radius:10px;
+  padding:11px 14px;font-size:14.5px;color:var(--ink);font-family:'Inter',sans-serif;
+  transition:border-color .15s,box-shadow .15s;outline:none}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(176,141,79,0.12)}
+.field{margin-bottom:14px}
+.num{font-family:'JetBrains Mono',monospace}
+.muted{color:var(--ink-soft)}
+.gold{color:var(--gold-deep)}
+.divider{height:1px;background:var(--line);margin:20px 0}
+.row-between{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.stack{display:flex;flex-direction:column;gap:3px}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:0 10px 10px;font-weight:600}
+td{padding:12px 10px;border-top:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+th.r,td.r{text-align:right}
 
-  .results{display:flex;flex-direction:column;gap:2px}
-  .res-row{display:flex;justify-content:space-between;align-items:baseline;
-    padding:14px 0;border-bottom:1px solid rgba(244,241,234,0.06)}
-  .res-row:last-child{border-bottom:none}
-  .res-label{font-size:13px;color:var(--cream-dim)}
-  .res-label small{display:block;font-size:10px;font-family:'JetBrains Mono',monospace;
-    letter-spacing:0.08em;color:rgba(185,180,167,0.55);margin-top:3px}
-  .res-val{font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--cream);
-    text-align:right;white-space:nowrap}
+/* ── HOMEPAGE ── */
+#home-wrap{position:relative;width:100%;height:100vh;overflow:hidden;background:#16120b}
+#three-canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.home-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;pointer-events:none;z-index:2}
+.home-overlay .hl-eyebrow{font-size:10px;letter-spacing:0.44em;text-transform:uppercase;
+  color:#c9a050;margin-bottom:14px;opacity:0.9}
+.home-overlay h1{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,9vw,96px);
+  letter-spacing:0.18em;color:#f4eedf;line-height:0.95;text-align:center}
+.home-overlay h1 em{color:#d4aa60;font-style:italic}
+.home-overlay .hl-tag{font-size:12px;letter-spacing:0.28em;text-transform:uppercase;
+  color:#c9a050;margin-top:14px;opacity:0.75}
+.home-ctas{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);
+  display:flex;gap:16px;z-index:4;pointer-events:all}
+.home-cta{display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;
+  padding:26px 36px;border-radius:16px;border:1px solid rgba(201,160,80,0.35);
+  background:rgba(22,18,11,0.55);backdrop-filter:blur(12px);
+  transition:transform .18s,border-color .18s,background .18s;min-width:180px;text-decoration:none}
+.home-cta:hover{transform:translateY(-4px);border-color:rgba(201,160,80,0.75);background:rgba(22,18,11,0.75)}
+.home-cta .cta-num{font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:0.3em;color:#c9a050;opacity:0.8}
+.home-cta .cta-label{font-family:'Cormorant Garamond',serif;font-size:26px;color:#f4eedf;letter-spacing:0.06em}
+.home-cta .cta-sub{font-size:11px;color:rgba(244,238,223,0.5);letter-spacing:0.08em}
+.home-scroll{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+  font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(201,160,80,0.45);z-index:4}
+@media(max-width:560px){.home-ctas{flex-direction:column;bottom:32px;gap:10px}.home-cta{padding:18px 28px;min-width:220px}}
 
-  .headline-res{background:linear-gradient(135deg,rgba(216,177,90,0.14),rgba(201,139,122,0.08));
-    border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:18px;
-    display:flex;justify-content:space-between;align-items:center;gap:16px}
-  .headline-res .hl-label{font-family:'JetBrains Mono',monospace;font-size:10px;
-    letter-spacing:0.24em;text-transform:uppercase;color:var(--gold)}
-  .headline-res .hl-main{font-family:'Instrument Serif',serif;font-size:38px;
-    line-height:1;color:var(--gold-soft);margin-top:6px}
-  .headline-res .hl-sub{font-family:'JetBrains Mono',monospace;font-size:13px;
-    color:var(--cream-dim);margin-top:6px}
+/* ── CALCULATOR ── */
+.formula-bar{padding:14px 16px;border-radius:10px;background:rgba(176,141,79,0.06);
+  border:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  color:var(--ink-soft);line-height:1.9;margin-top:12px}
+.formula-bar b{color:var(--ink)}
+.formula-bar .warn{margin-top:10px;padding:10px 12px;border-radius:8px;
+  background:rgba(169,96,63,0.07);border:1px solid rgba(169,96,63,0.25);color:var(--rose);
+  font-family:'Inter',sans-serif;font-size:12px;line-height:1.6}
+.totbar{display:flex;flex-wrap:wrap;gap:20px;padding:18px 22px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(176,141,79,0.11),rgba(169,96,63,0.06));border:1px solid var(--line)}
+.totbar .t{flex:1;min-width:100px}
+.totbar .t .k{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold-deep)}
+.totbar .t .v{font-family:'Cormorant Garamond',serif;font-size:28px;margin-top:2px}
 
-  .totals{margin-top:18px;padding-top:18px;border-top:1px dashed var(--line)}
-  .totals .res-val{color:var(--gold-soft)}
+/* ── INVOICE ── */
+.upload-zone{border:2px dashed var(--line);border-radius:14px;padding:46px 32px;text-align:center;
+  cursor:pointer;transition:border-color .2s,background .2s;background:rgba(176,141,79,0.03)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--gold);background:rgba(176,141,79,0.07)}
+.upload-zone .uz-icon{font-size:36px;margin-bottom:10px;opacity:0.5}
+.upload-zone h3{font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:5px}
+.upload-zone p{color:var(--ink-soft);font-size:13px}
+#file-input{display:none}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.prod-card{border:1.5px solid var(--line);border-radius:12px;padding:15px;cursor:pointer;
+  transition:border-color .15s,background .15s,transform .12s;background:var(--paper-2)}
+.prod-card:hover{border-color:var(--gold-soft);transform:translateY(-1px)}
+.prod-card.sel{border-color:var(--gold);background:rgba(176,141,79,0.08)}
+.prod-card .pn{font-weight:500;font-size:13.5px;line-height:1.4;margin-bottom:5px}
+.prod-card .pp{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold-deep)}
+.prod-card .pm{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.prod-card .qty-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.prod-card .qty-row button{width:28px;height:28px;border-radius:6px;border:1px solid var(--line);
+  background:var(--paper-2);color:var(--ink);font-size:16px;display:flex;align-items:center;justify-content:center;padding:0}
+.prod-card .qty-row button:hover{border-color:var(--gold);background:rgba(176,141,79,0.08)}
+.prod-card .qty-row .qv{font-family:'JetBrains Mono',monospace;font-size:15px;min-width:22px;text-align:center}
 
-  .formula{margin-top:24px}
-  .formula details{border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .formula summary{cursor:pointer;list-style:none;padding:14px 18px;
-    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;
-    text-transform:uppercase;color:var(--gold);display:flex;justify-content:space-between;
-    align-items:center}
-  .formula summary::-webkit-details-marker{display:none}
-  .formula summary .chev{transition:transform .25s}
-  .formula details[open] summary .chev{transform:rotate(180deg)}
-  .formula .body{padding:4px 18px 18px;font-family:'JetBrains Mono',monospace;
-    font-size:12.5px;line-height:1.9;color:var(--cream-dim)}
-  .formula .body .step{display:flex;justify-content:space-between;gap:14px;
-    padding:5px 0;border-bottom:1px solid rgba(244,241,234,0.05)}
-  .formula .body .step:last-child{border-bottom:none}
-  .formula .body .step b{color:var(--cream);font-weight:500}
-  .formula .note{margin-top:14px;padding:12px 14px;border-radius:9px;
-    background:rgba(201,139,122,0.08);border:1px solid rgba(201,139,122,0.25);
-    color:var(--rose);font-family:'Inter',sans-serif;font-size:12px;line-height:1.6}
+/* ── RECEIPT ── */
+.receipt{background:#fff;max-width:660px;margin:0 auto;
+  border:1px solid var(--line);border-radius:14px;padding:50px 54px;box-shadow:var(--shadow)}
+.receipt-head{text-align:center;padding-bottom:26px;border-bottom:2px solid var(--gold)}
+.receipt-head .rlogo{font-family:'Cormorant Garamond',serif;font-size:40px;letter-spacing:0.22em;color:var(--gold-deep)}
+.receipt-head .rtag{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px}
+.receipt-meta{display:flex;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--ink-soft)}
+.receipt-meta b{color:var(--ink);display:block;margin-top:2px;font-size:14px}
+.receipt-section{margin-top:22px}
+.receipt-section h4{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:12px}
+.receipt table th{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-soft);padding:0 8px 10px;font-weight:600}
+.receipt table td{padding:11px 8px;border-top:1px solid #f0ebe0;font-size:13.5px}
+.receipt table th.r,.receipt table td.r{text-align:right}
+.receipt-totals{margin-top:6px;display:flex;flex-direction:column;align-items:flex-end}
+.receipt-totals .ln{display:flex;justify-content:space-between;width:240px;padding:7px 0;
+  font-size:13px;color:var(--ink-soft);border-bottom:1px solid #f0ebe0}
+.receipt-totals .ln:last-child{border-bottom:none}
+.receipt-totals .grand{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--ink);
+  border-top:2px solid var(--gold);margin-top:4px;padding-top:10px}
+.receipt-foot{text-align:center;margin-top:30px;padding-top:22px;border-top:1px solid var(--line-soft)}
+.receipt-foot .ty{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold-deep);font-style:italic;margin-bottom:5px}
+.receipt-foot p{font-size:12px;color:var(--ink-soft);line-height:1.7}
+.internal-note{margin-top:18px;padding:14px 17px;border-radius:10px;background:rgba(176,141,79,0.06);border:1px dashed var(--line)}
+.internal-note h4{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:10px}
 
-  footer{text-align:center;margin-top:48px;font-family:'JetBrains Mono',monospace;
-    font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(185,180,167,0.4)}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:10px;font-size:13px;
+  opacity:0;pointer-events:none;transition:.24s;z-index:200;box-shadow:0 12px 30px -10px rgba(0,0,0,0.5)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  body,.page-bg{background:#fff!important}
+  .no-print{display:none!important}
+  main{padding:0;max-width:none}
+  .receipt{border:none;box-shadow:none;border-radius:0;padding:24px 30px}
+  .internal-note{display:none}
+  .topbar{display:none}
+}
+@media(max-width:560px){
+  main{padding:22px 14px 80px}
+  .receipt{padding:30px 20px}
+  .receipt-head .rlogo{font-size:28px}
+  .receipt-totals .ln{width:200px}
+}
 </style>
 </head>
 <body>
-<canvas id="bg"></canvas>
-<div class="vignette"></div>
-
-<div class="wrap">
-  <header>
-    <div class="eyebrow">Atelier Pricing Engine</div>
-    <h1>L'Allure <em>Pricing</em> Calculator</h1>
-    <p class="sub">Turn a UK supplier price into a landed cost and a margin-backed sell price, in taka and sterling, at a glance.</p>
-  </header>
-
-  <div class="grid">
-    <!-- INPUTS -->
-    <div class="panel">
-      <div class="panel-title">Your inputs</div>
-
-      <div class="field">
-        <label>Item price <span class="hint">GBP · x</span></label>
-        <div class="input-row"><span class="unit">£</span>
-          <input type="number" id="price" value="20" step="0.01" min="0"></div>
-      </div>
-
-      <div class="field">
-        <label>Conversion rate <span class="hint">GBP → BDT</span></label>
-        <div class="input-row bare">
-          <input type="number" id="rate" value="150" step="0.01" min="0" style="padding-left:14px"></div>
-      </div>
-
-      <div class="field">
-        <label>Weight <span class="hint">grams</span></label>
-        <div class="input-row suffix"><span class="unit">g</span>
-          <input type="number" id="weight" value="200" step="1" min="0"></div>
-      </div>
-
-      <div class="field">
-        <label>Quantity <span class="hint">units</span></label>
-        <div class="input-row bare">
-          <input type="number" id="qty" value="1" step="1" min="1" style="padding-left:14px"></div>
-      </div>
-
-      <div class="field">
-        <label>Profit margin <span class="hint">% on cost</span></label>
-        <div class="input-row suffix"><span class="unit">%</span>
-          <input type="number" id="margin" value="40" step="1" min="0"></div>
-      </div>
-    </div>
-
-    <!-- RESULTS -->
-    <div class="panel">
-      <div class="panel-title">Per unit</div>
-      <div class="results">
-        <div class="res-row">
-          <div class="res-label">Cost of product
-            <small>1.5 × (x + 6.5 × kg + 10) × rate</small></div>
-          <div class="res-val" id="cost">৳0</div>
-        </div>
-        <div class="res-row">
-          <div class="res-label">Selling price
-            <small>cost + cost × margin</small></div>
-          <div class="res-val" id="sell">৳0</div>
-        </div>
-      </div>
-
-      <div class="headline-res">
-        <div>
-          <div class="hl-label">Profit per unit</div>
-          <div class="hl-main" id="profitBdt">৳0</div>
-          <div class="hl-sub" id="profitGbp">£0.00</div>
-        </div>
-        <div style="text-align:right">
-          <div class="hl-label">Margin</div>
-          <div class="hl-main" id="marginEcho" style="font-size:30px">40%</div>
-        </div>
-      </div>
-
-      <div class="totals">
-        <div class="panel-title" style="margin-bottom:14px">Order total <span id="qtyEcho" style="color:var(--cream-dim);text-transform:none;letter-spacing:0">× 1</span></div>
-        <div class="results">
-          <div class="res-row"><div class="res-label">Total cost</div><div class="res-val" id="tCost">৳0</div></div>
-          <div class="res-row"><div class="res-label">Total revenue</div><div class="res-val" id="tSell">৳0</div></div>
-          <div class="res-row"><div class="res-label">Total profit (BDT)</div><div class="res-val" id="tProfitBdt">৳0</div></div>
-          <div class="res-row"><div class="res-label">Total profit (GBP)</div><div class="res-val" id="tProfitGbp">£0.00</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="formula">
-    <details>
-      <summary>How this number is built <span class="chev">▾</span></summary>
-      <div class="body">
-        <div class="step"><span>Landed value (GBP) = x + 6.5 × (weight ÷ 1000) + 10</span><b id="fLanded">£0.00</b></div>
-        <div class="step"><span>Buffered ×1.5</span><b id="fBuffered">£0.00</b></div>
-        <div class="step"><span>Cost in BDT = buffered × rate</span><b id="fCost">৳0</b></div>
-        <div class="step"><span>Selling = cost × (1 + margin)</span><b id="fSell">৳0</b></div>
-        <div class="step"><span>Profit BDT = cost × margin</span><b id="fProfitBdt">৳0</b></div>
-        <div class="step"><span>Profit GBP = profit BDT ÷ rate</span><b id="fProfitGbp">£0.00</b></div>
-        <div class="note"><b>Heads up on the flat fees.</b> The £6.5 per kilo shipping and the £10 flat charge are applied per unit, then multiplied by quantity. If the £10 is a once-per-shipment customs or handling fee, your order totals will run high. Adjust the model if that is the case.</div>
-      </div>
-    </details>
-  </div>
-
-  <footer>L'Allure · Client-side · Nothing leaves this page</footer>
-</div>
-
+<div id="app"></div>
+<div class="toast" id="toast"></div>
 <script>
-/* ---------- Pricing logic ---------- */
-const $ = id => document.getElementById(id);
-const ids = ['price','rate','weight','qty','margin'];
+/* ════════════════════════════════════════════════════
+   L'ALLURÉE — merged workspace
+   Routes: #/ home | #/calc calculator | #/invoice | #/receipt/id | #/orders
+   ════════════════════════════════════════════════════ */
 
-const bdt = n => '৳' + (isFinite(n) ? Math.round(n).toLocaleString('en-IN') : '0');
-const bdt2 = n => '৳' + (isFinite(n) ? n.toLocaleString('en-IN',{maximumFractionDigits:2}) : '0');
-const gbp = n => '£' + (isFinite(n) ? n.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00');
+/* ── LOGO SVG ── */
+const MARK = `<svg class="bmark" viewBox="0 0 100 100" fill="none">
+<g stroke="#b08d4f" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+<path d="M37 21C29 27 26 38 29 47 30 52 28 55 26 58 24 61 26 64 30 64 30 69 33 74 40 76"/>
+<path d="M29 47C32 47 35 48 36 51"/>
+<path d="M63 39C58 35 51 35 48 41 45 47 48 54 55 55 62 56 68 50 66 43 64 37 58 34 53 36"/>
+<path d="M57 44C55 42 51 43 50 47 49 50 52 52 56 51 60 50 60 45 57 44"/>
+<path d="M66 43C71 41 76 45 77 51 78 57 73 63 67 62"/>
+<path d="M55 55C54 62 56 67 62 70 67 73 73 70 75 65"/>
+<path d="M62 70C61 76 59 80 57 84"/>
+<path d="M59 76C64 75 68 78 70 82"/>
+<path d="M58 80C53 80 49 82 47 86"/>
+</g></svg>`;
 
-let currentMargin = 0.4; // drives the gem glow
+/* ── STORE ── */
+const DB_KEY='alluree_v3';
+function dbLoad(){try{return JSON.parse(localStorage.getItem(DB_KEY))||{products:[],receipts:[],seq:1};}catch{return{products:[],receipts:[],seq:1};}}
+function dbSave(d){localStorage.setItem(DB_KEY,JSON.stringify(d));}
+let DB=dbLoad();
 
-function calc(){
-  const x = parseFloat($('price').value) || 0;
-  const rate = parseFloat($('rate').value) || 0;
-  const weight = parseFloat($('weight').value) || 0;
-  const qty = Math.max(1, parseFloat($('qty').value) || 1);
-  const marginPct = parseFloat($('margin').value) || 0;
-  const m = marginPct / 100;
-  currentMargin = m;
+/* ── HELPERS ── */
+const $=(s,el=document)=>el.querySelector(s);
+const $$=(s,el=document)=>el.querySelectorAll(s);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const bdt=n=>'৳'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const gbp=n=>'£'+Number(n||0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate=ts=>new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let _tt;
+function toast(m,d=2400){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),d);}
+const go=h=>{location.hash=h;};
 
-  const landed = x + 6.5 * (weight / 1000) + 10;     // GBP
-  const buffered = 1.5 * landed;                       // GBP
-  const cost = buffered * rate;                        // BDT
-  const sell = cost + cost * m;                         // BDT
-  const profitBdt = sell - cost;                       // BDT
-  const profitGbp = rate ? profitBdt / rate : 0;       // GBP
+/* ── CALCULATOR STATE ── */
+let CALC={price:'',rate:'150',weight:'',qty:'1',mult:'1',margin:'40'};
 
-  // per unit
-  $('cost').textContent = bdt(cost);
-  $('sell').textContent = bdt(sell);
-  $('profitBdt').textContent = bdt(profitBdt);
-  $('profitGbp').textContent = gbp(profitGbp);
-  $('marginEcho').textContent = marginPct + '%';
+/* ── INVOICE STATE ── */
+let CART={};
+let OM={customer:'',phone:'',email:'',ref:'',discountType:'pct',discountVal:'',note:''};
 
-  // order totals
-  $('qtyEcho').textContent = '× ' + qty;
-  $('tCost').textContent = bdt(cost * qty);
-  $('tSell').textContent = bdt(sell * qty);
-  $('tProfitBdt').textContent = bdt(profitBdt * qty);
-  $('tProfitGbp').textContent = gbp(profitGbp * qty);
+/* ═══════════════════════════════════════════════════
+   ROUTER
+═══════════════════════════════════════════════════ */
+window.addEventListener('hashchange',render);
+window.addEventListener('load',render);
+let _3d=null;
 
-  // breakdown
-  $('fLanded').textContent = gbp(landed);
-  $('fBuffered').textContent = gbp(buffered);
-  $('fCost').textContent = bdt2(cost);
-  $('fSell').textContent = bdt2(sell);
-  $('fProfitBdt').textContent = bdt2(profitBdt);
-  $('fProfitGbp').textContent = gbp(profitGbp);
-}
-ids.forEach(id => $(id).addEventListener('input', calc));
-calc();
-
-/* ---------- 3D ambient background ---------- */
-const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const canvas = $('bg');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
-
-const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x0a0a0f, 0.045);
-const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
-camera.position.z = 14;
-
-// lights
-scene.add(new THREE.AmbientLight(0x404048, 0.6));
-const key = new THREE.PointLight(0xe7cf94, 2.2, 60); key.position.set(8,10,12); scene.add(key);
-const rim = new THREE.PointLight(0xc98b7a, 1.4, 60); rim.position.set(-12,-6,8); scene.add(rim);
-
-// drifting faceted shards
-const shards = [];
-const shardGeoms = [
-  new THREE.IcosahedronGeometry(1, 0),
-  new THREE.OctahedronGeometry(1, 0),
-  new THREE.TetrahedronGeometry(1.1, 0)
-];
-const shardMat = () => new THREE.MeshStandardMaterial({
-  color:0xd8b15a, metalness:0.85, roughness:0.35,
-  emissive:0x3a2c10, emissiveIntensity:0.4, flatShading:true,
-  transparent:true, opacity:0.92
-});
-for(let i=0;i<14;i++){
-  const g = shardGeoms[i % shardGeoms.length];
-  const mesh = new THREE.Mesh(g, shardMat());
-  const s = 0.4 + Math.random()*1.1;
-  mesh.scale.setScalar(s);
-  mesh.position.set((Math.random()-0.5)*26,(Math.random()-0.5)*16,(Math.random()-0.5)*10 - 4);
-  mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
-  mesh.userData = {
-    rx:(Math.random()-0.5)*0.004, ry:(Math.random()-0.5)*0.004,
-    fy:0.15+Math.random()*0.25, ph:Math.random()*Math.PI*2, base:mesh.position.y
-  };
-  scene.add(mesh); shards.push(mesh);
+function render(){
+  const h=location.hash||'#/';
+  const parts=h.replace('#/','').split('/');
+  const route=parts[0], arg=parts[1];
+  const app=$('#app');
+  /* destroy 3d on navigation away */
+  if(_3d&&route!==''){_3d.stop();_3d=null;}
+  if(route===''||route==='home'){
+    app.innerHTML=viewHome();
+    requestAnimationFrame(()=>{_3d=initThree();});
+    bindHome();
+  } else if(route==='calc'){
+    app.innerHTML=`<div class="page-bg">${topbar(h)}<main>${viewCalc()}</main></div>`;
+    bindCalc();
+  } else if(route==='invoice'){
+    app.innerHTML=`<div class="page-bg">${topbar(h)}<main>${viewInvoice()}</main></div>`;
+    bindInvoice();
+  } else if(route==='receipt'&&arg){
+    app.innerHTML=`<div class="page-bg">${topbar(h)}<main>${viewReceipt(arg)}</main></div>`;
+    bindReceipt();
+  } else if(route==='orders'){
+    app.innerHTML=`<div class="page-bg">${topbar(h)}<main>${viewOrders()}</main></div>`;
+  } else {
+    go('#/');
+  }
 }
 
-// hero gem: a faceted jewel that brightens with profit margin
-const gem = new THREE.Mesh(
-  new THREE.IcosahedronGeometry(2.1, 0),
-  new THREE.MeshStandardMaterial({
-    color:0xe7cf94, metalness:0.95, roughness:0.18,
-    emissive:0xd8b15a, emissiveIntensity:0.5, flatShading:true
-  })
-);
-gem.position.set(0, 0, -1);
-scene.add(gem);
-const gemGlow = new THREE.PointLight(0xe7cf94, 0, 30);
-gemGlow.position.set(0,0,2); scene.add(gemGlow);
+/* ── TOPBAR ── */
+function topbar(h){
+  const lnk=(href,lbl)=>`<a href="${href}" class="${h.startsWith(href)?'active':''}">${lbl}</a>`;
+  return `<div class="topbar no-print">
+    <div class="brand" onclick="go('#/')">
+      ${MARK}<div><div class="wm">L&#x2019;ALLUR&#xC9;E</div><div class="tag">Luxury Beauty</div></div>
+    </div>
+    <nav>${lnk('#/calc','Calculator')}${lnk('#/invoice','Invoice')}${lnk('#/orders','Receipts')}</nav>
+    <div style="width:80px"></div>
+  </div>`;
+}
 
-let t = 0, gemEase = 0.5;
-function animate(){
-  t += 0.01;
-  shards.forEach(m=>{
-    m.rotation.x += m.userData.rx;
-    m.rotation.y += m.userData.ry;
-    m.position.y = m.userData.base + Math.sin(t*m.userData.fy + m.userData.ph)*0.6;
+/* ═══════════════════════════════════════════════════
+   HOME — Three.js 3D floating beauty objects
+═══════════════════════════════════════════════════ */
+function viewHome(){
+  return `<div id="home-wrap">
+    <canvas id="three-canvas"></canvas>
+    <div class="home-overlay">
+      <div class="hl-eyebrow">Redefining Luxury Beauty</div>
+      <h1>L&#x2019;ALLUR<em>&#xC9;E</em></h1>
+      <div class="hl-tag">Internal Workspace</div>
+    </div>
+    <div class="home-ctas">
+      <a href="#/calc" class="home-cta">
+        <span class="cta-num">01</span>
+        <span class="cta-label">Calculator</span>
+        <span class="cta-sub">Price any product</span>
+      </a>
+      <a href="#/invoice" class="home-cta">
+        <span class="cta-num">02</span>
+        <span class="cta-label">Invoice</span>
+        <span class="cta-sub">Build &amp; generate</span>
+      </a>
+    </div>
+    <div class="home-scroll">scroll to explore</div>
+  </div>`;
+}
+function bindHome(){}
+
+function initThree(){
+  const canvas=document.getElementById('three-canvas');
+  if(!canvas||!window.THREE)return null;
+  const W=canvas.parentElement.offsetWidth, H=canvas.parentElement.offsetHeight;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(W,H);
+  renderer.setClearColor(0x16120b,1);
+
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x1e1912,0.038);
+
+  const cam=new THREE.PerspectiveCamera(55,W/H,0.1,120);
+  cam.position.set(0,0,18);
+
+  /* lights */
+  scene.add(new THREE.AmbientLight(0x3a2e1e,1.2));
+  const key=new THREE.PointLight(0xe8cf88,3.5,80);key.position.set(10,14,12);scene.add(key);
+  const rim=new THREE.PointLight(0xc98b7a,2,60);rim.position.set(-14,-8,8);scene.add(rim);
+  const fill=new THREE.PointLight(0xb08d4f,1.2,60);fill.position.set(0,0,10);scene.add(fill);
+
+  /* materials */
+  const matGold=new THREE.MeshStandardMaterial({color:0xc4a050,metalness:0.92,roughness:0.22,flatShading:false});
+  const matRose=new THREE.MeshStandardMaterial({color:0xd4896a,metalness:0.6,roughness:0.45,flatShading:false});
+  const matCream=new THREE.MeshStandardMaterial({color:0xf0e8d4,metalness:0.3,roughness:0.65,flatShading:false});
+  const matDark=new THREE.MeshStandardMaterial({color:0x2a1f12,metalness:0.8,roughness:0.3,flatShading:true});
+  const matGlass=new THREE.MeshStandardMaterial({color:0xd8cdb8,metalness:0.15,roughness:0.05,
+    transparent:true,opacity:0.55,flatShading:false});
+
+  /* BEAUTY OBJECTS: perfume bottles, lipstick, compact, serum vial, jar */
+  function perfumeBottle(mat1,mat2,s=1){
+    const g=new THREE.Group();
+    /* body */
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(0.32*s,0.36*s,1.2*s,16),mat1);
+    g.add(body);
+    /* shoulder bevel */
+    const sh=new THREE.Mesh(new THREE.CylinderGeometry(0.16*s,0.32*s,0.22*s,16),mat1);
+    sh.position.y=0.71*s;g.add(sh);
+    /* neck */
+    const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.12*s,0.16*s,0.28*s,16),mat1);
+    neck.position.y=0.95*s;g.add(neck);
+    /* cap */
+    const cap=new THREE.Mesh(new THREE.BoxGeometry(0.3*s,0.24*s,0.3*s),mat2);
+    cap.position.y=1.18*s;g.add(cap);
+    return g;
+  }
+
+  function serumVial(s=1){
+    const g=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(0.18*s,0.22*s,1.4*s,12),matGlass);g.add(body);
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(0.18*s,10,6),matGold);cap.position.y=0.78*s;g.add(cap);
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(0.22*s,0.22*s,0.06*s,12),matGold);base.position.y=-0.73*s;g.add(base);
+    return g;
+  }
+
+  function lipstick(s=1){
+    const g=new THREE.Group();
+    const tube=new THREE.Mesh(new THREE.CylinderGeometry(0.22*s,0.22*s,0.9*s,12),matRose);g.add(tube);
+    const bullet=new THREE.Mesh(new THREE.CylinderGeometry(0.18*s,0.22*s,0.52*s,12),matCream);bullet.position.y=0.7*s;g.add(bullet);
+    const tip=new THREE.Mesh(new THREE.SphereGeometry(0.18*s,10,8),matCream);tip.position.y=0.97*s;g.add(tip);
+    return g;
+  }
+
+  function compactJar(s=1){
+    const g=new THREE.Group();
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(0.5*s,0.5*s,0.24*s,20),matCream);g.add(base);
+    const lid=new THREE.Mesh(new THREE.CylinderGeometry(0.5*s,0.5*s,0.12*s,20),matGold);lid.position.y=0.18*s;g.add(lid);
+    const rim2=new THREE.Mesh(new THREE.TorusGeometry(0.5*s,0.03*s,8,20),matGold);rim2.position.y=0.22*s;g.add(rim2);
+    return g;
+  }
+
+  function facetedGem(s=1){
+    const mesh=new THREE.Mesh(new THREE.IcosahedronGeometry(0.45*s,0),matGold);
+    return mesh;
+  }
+
+  function rosePetal(s=1){
+    /* simplified with sphere segments */
+    const g=new THREE.Group();
+    [0,60,120,180,240,300].forEach(angle=>{
+      const m=new THREE.Mesh(new THREE.SphereGeometry(0.22*s,8,5),matRose);
+      const r=0.28*s;
+      m.position.set(Math.cos(angle*Math.PI/180)*r,0,Math.sin(angle*Math.PI/180)*r);
+      m.scale.set(1,0.45,0.7);
+      g.add(m);
+    });
+    const centre=new THREE.Mesh(new THREE.SphereGeometry(0.18*s,8,8),matRose);g.add(centre);
+    return g;
+  }
+
+  /* create a field of floating objects */
+  const objects=[];
+  const factories=[
+    ()=>perfumeBottle(matGold,matDark,1+Math.random()*0.5),
+    ()=>perfumeBottle(matCream,matGold,0.8+Math.random()*0.4),
+    ()=>serumVial(0.9+Math.random()*0.5),
+    ()=>lipstick(0.8+Math.random()*0.5),
+    ()=>compactJar(0.7+Math.random()*0.5),
+    ()=>facetedGem(0.8+Math.random()*0.8),
+    ()=>rosePetal(0.8+Math.random()*0.6),
+  ];
+
+  for(let i=0;i<28;i++){
+    const obj=factories[i%factories.length]();
+    obj.position.set(
+      (Math.random()-0.5)*32,
+      (Math.random()-0.5)*20,
+      (Math.random()-0.5)*18-4
+    );
+    obj.rotation.set(Math.random()*Math.PI*2,Math.random()*Math.PI*2,Math.random()*Math.PI*2);
+    const spd={rx:(Math.random()-0.5)*0.006,ry:(Math.random()-0.5)*0.008,
+               fy:0.1+Math.random()*0.3,ph:Math.random()*Math.PI*2,by:obj.position.y};
+    obj.userData=spd;
+    scene.add(obj);
+    objects.push(obj);
+  }
+
+  /* mouse parallax */
+  let mx=0,my=0;
+  const onMouse=e=>{mx=(e.clientX/innerWidth-0.5)*2;my=-(e.clientY/innerHeight-0.5)*2;};
+  window.addEventListener('mousemove',onMouse);
+
+  let raf,stopped=false,t=0;
+  function animate(){
+    if(stopped)return;
+    raf=requestAnimationFrame(animate);
+    t+=0.01;
+    objects.forEach(o=>{
+      o.rotation.x+=o.userData.rx;
+      o.rotation.y+=o.userData.ry;
+      o.position.y=o.userData.by+Math.sin(t*o.userData.fy+o.userData.ph)*0.55;
+    });
+    cam.position.x+=(mx*1.8-cam.position.x)*0.04;
+    cam.position.y+=(my*1.2-cam.position.y)*0.04;
+    cam.lookAt(0,0,0);
+    renderer.render(scene,cam);
+  }
+  animate();
+
+  window.addEventListener('resize',()=>{
+    const pw=canvas.parentElement.offsetWidth,ph=canvas.parentElement.offsetHeight;
+    cam.aspect=pw/ph;cam.updateProjectionMatrix();
+    renderer.setSize(pw,ph);
   });
-  // gem responds to margin: more margin -> brighter, faster spin
-  const target = Math.min(currentMargin, 1.2);
-  gemEase += (target - gemEase) * 0.05;
-  gem.rotation.y += 0.003 + gemEase*0.01;
-  gem.rotation.x = Math.sin(t*0.3)*0.15;
-  gem.material.emissiveIntensity = 0.4 + gemEase*1.6;
-  gemGlow.intensity = gemEase*3.2;
-  camera.position.x = Math.sin(t*0.1)*0.6;
-  camera.position.y = Math.cos(t*0.08)*0.4;
-  camera.lookAt(0,0,-1);
-  renderer.render(scene, camera);
-  if(!reduce) requestAnimationFrame(animate);
-}
-if(reduce){ gemEase = currentMargin; renderer.render(scene,camera); }
-else animate();
 
-addEventListener('resize', ()=>{
-  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-});
+  return {stop(){stopped=true;cancelAnimationFrame(raf);window.removeEventListener('mousemove',onMouse);renderer.dispose();}};
+}
+
+/* ═══════════════════════════════════════════════════
+   CALCULATOR VIEW
+═══════════════════════════════════════════════════ */
+function viewCalc(){
+  return `<div class="page-head">
+    <div class="eyebrow">Tool 01</div>
+    <h1>Product Calculator</h1>
+    <p>Enter a UK product price. Get landed cost in BDT, selling price, and profit — instantly.</p>
+  </div>
+  <div class="card">
+    <div class="grid3" style="margin-bottom:0">
+      <div class="field"><label>Product price <span class="hint">GBP</span></label>
+        <input type="number" id="c-price" value="${CALC.price}" step="0.01" min="0" placeholder="0.00"></div>
+      <div class="field"><label>Conversion rate <span class="hint">GBP→BDT</span></label>
+        <input type="number" id="c-rate" value="${CALC.rate}" step="0.01" min="0"></div>
+      <div class="field"><label>Weight <span class="hint">grams</span></label>
+        <input type="number" id="c-weight" value="${CALC.weight}" step="1" min="0" placeholder="0"></div>
+      <div class="field"><label>Quantity</label>
+        <input type="number" id="c-qty" value="${CALC.qty}" step="1" min="1"></div>
+      <div class="field"><label>Expense multiplier <span class="hint">× optional</span></label>
+        <input type="number" id="c-mult" value="${CALC.mult}" step="0.05" min="1" title="Leave at 1 for standard formula. Increase to buffer extra expenses."></div>
+      <div class="field"><label>Profit margin <span class="hint">%</span></label>
+        <input type="number" id="c-margin" value="${CALC.margin}" step="1" min="0"></div>
+    </div>
+    <div class="formula-bar" id="c-preview">Fill in the form above to see results</div>
+  </div>
+  <div class="totbar" id="c-totbar" style="margin-top:18px">
+    <div class="t"><div class="k">Sell price</div><div class="v num" id="ct-sell">—</div></div>
+    <div class="t"><div class="k">Cost</div><div class="v num" id="ct-cost">—</div></div>
+    <div class="t"><div class="k">Profit (BDT)</div><div class="v num gold" id="ct-pBDT">—</div></div>
+    <div class="t"><div class="k">Profit (GBP)</div><div class="v num gold" id="ct-pGBP">—</div></div>
+  </div>
+  ${CALC.qty>1?`<div class="card" style="margin-top:18px">
+    <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:14px">Order Total (×${CALC.qty})</div>
+    <div class="totbar" style="background:transparent;border:none;padding:0">
+      <div class="t"><div class="k">Total sell</div><div class="v num" id="ct-tsell">—</div></div>
+      <div class="t"><div class="k">Total cost</div><div class="v num" id="ct-tcost">—</div></div>
+      <div class="t"><div class="k">Total profit (BDT)</div><div class="v num gold" id="ct-tpBDT">—</div></div>
+      <div class="t"><div class="k">Total profit (GBP)</div><div class="v num gold" id="ct-tpGBP">—</div></div>
+    </div>
+  </div>`:''}`;
+}
+
+function calcCompute(){
+  const x=parseFloat(CALC.price)||0, rate=parseFloat(CALC.rate)||0,
+        w=parseFloat(CALC.weight)||0, qty=Math.max(1,parseInt(CALC.qty)||1),
+        mult=Math.max(1,parseFloat(CALC.mult)||1), m=(parseFloat(CALC.margin)||0)/100;
+  const landedGBP=x+6.5*(w/1000)+10;
+  const costBDT=landedGBP*rate*mult;
+  const sellBDT=costBDT*(1+m);
+  const profitBDT=sellBDT-costBDT;
+  const profitGBP=rate?profitBDT/rate:0;
+  return {landedGBP,costBDT,sellBDT,profitBDT,profitGBP,qty,mult,m};
+}
+
+function updateCalcUI(){
+  const r=calcCompute();
+  const qty=Math.max(1,parseInt(CALC.qty)||1);
+  const ship=(6.5*((parseFloat(CALC.weight)||0)/1000)).toFixed(2);
+  const multWarn=r.mult>1?`<div class="warn">Expense buffer ×${r.mult} active — cost inflated by ${Math.round((r.mult-1)*100)}% above base formula.</div>`:'';
+  $('#c-preview').innerHTML=`<b>Landed:</b> £${(parseFloat(CALC.price)||0).toFixed(2)} + £${ship} shipping + £10.00 delivery = <b>£${r.landedGBP.toFixed(2)}</b>
+  &nbsp;·&nbsp; ×${CALC.rate} rate${r.mult>1?` ×${r.mult} buffer`:''} = <b>${bdt(r.costBDT)}</b> cost
+  &nbsp;·&nbsp; <b>Sell:</b> ${bdt(r.sellBDT)} &nbsp;·&nbsp; <b>Profit:</b> ${bdt(r.profitBDT)} · ${gbp(r.profitGBP)}${multWarn}`;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('ct-sell',bdt(r.sellBDT));set('ct-cost',bdt(r.costBDT));
+  set('ct-pBDT',bdt(r.profitBDT));set('ct-pGBP',gbp(r.profitGBP));
+  if(qty>1){set('ct-tsell',bdt(r.sellBDT*qty));set('ct-tcost',bdt(r.costBDT*qty));
+    set('ct-tpBDT',bdt(r.profitBDT*qty));set('ct-tpGBP',gbp(r.profitGBP*qty));}
+}
+
+function bindCalc(){
+  ['price','rate','weight','qty','mult','margin'].forEach(k=>{
+    const el=document.getElementById('c-'+k);
+    if(!el)return;
+    el.addEventListener('input',()=>{CALC[k]=el.value;
+      if(k==='qty')render(); else updateCalcUI();
+    });
+  });
+  updateCalcUI();
+}
+
+/* ═══════════════════════════════════════════════════
+   INVOICE VIEW
+═══════════════════════════════════════════════════ */
+function viewInvoice(){
+  const has=DB.products.length>0;
+  const cartCount=Object.values(CART).reduce((a,v)=>a+v,0);
+  const {subtotal,cartItems}=calcCart();
+
+  const productCards=DB.products.map(p=>{
+    const qty=CART[p.id]||0;
+    return `<div class="prod-card${qty>0?' sel':''}" data-id="${p.id}">
+      <div class="pn">${esc(p.name)}</div>
+      <div class="pp">${bdt(p.sellPrice)}</div>
+      <div class="pm">${p.margin?p.margin+'% margin · ':''} per unit</div>
+      ${qty>0?`<div class="qty-row">
+        <button data-minus="${p.id}">−</button>
+        <span class="qv">${qty}</span>
+        <button data-plus="${p.id}">+</button>
+      </div>`:`<button class="btn sm" data-add="${p.id}" style="width:100%;justify-content:center;margin-top:10px">+ Add</button>`}
+    </div>`;
+  }).join('');
+
+  return `<div class="page-head">
+    <div class="eyebrow">Tool 02</div>
+    <h1>Invoice Builder</h1>
+    <p>Upload your price list, pick products, add customer details, and print a receipt.</p>
+  </div>
+
+  <!-- Step 1: Price list -->
+  <div class="card">
+    <div class="row-between" style="margin-bottom:${has?'14px':'0'}">
+      <div><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:4px">Step 1</div>
+        <h2 style="font-size:20px">Price List</h2></div>
+      ${has?`<div style="display:flex;gap:8px;align-items:center">
+        <span class="muted" style="font-size:13px">${DB.products.length} products</span>
+        <button class="btn ghost sm" id="clear-products">Clear &amp; reload</button>
+      </div>`:''}
+    </div>
+    ${!has?`<div class="upload-zone" id="upload-zone">
+      <input type="file" id="file-input" accept=".xlsx,.xls">
+      <div class="uz-icon">📊</div>
+      <h3>Drop your L&#x2019;ALLUR&#xC9;E Excel file</h3>
+      <p>Click to browse &nbsp;·&nbsp; .xlsx format</p>
+    </div>`:`<table><thead><tr><th>Product</th><th class="r">Sell Price</th><th class="r">Margin</th></tr></thead>
+    <tbody>${DB.products.map(p=>`<tr><td>${esc(p.name)}</td><td class="r num">${bdt(p.sellPrice)}</td><td class="r muted">${p.margin||'—'}%</td></tr>`).join('')}
+    </tbody></table>`}
+  </div>
+
+  ${has?`
+  <!-- Step 2: Products -->
+  <div class="card">
+    <div style="margin-bottom:16px"><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:4px">Step 2</div>
+      <h2 style="font-size:20px">Select Products</h2></div>
+    <div class="prod-grid">${productCards}</div>
+  </div>
+
+  <!-- Step 3: Customer -->
+  <div class="card">
+    <div style="margin-bottom:18px"><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:4px">Step 3</div>
+      <h2 style="font-size:20px">Customer &amp; Discount</h2></div>
+    <div class="grid2">
+      <div class="field"><label>Customer Name</label><input type="text" id="o-customer" value="${esc(OM.customer)}" placeholder="Full name"></div>
+      <div class="field"><label>Phone / WhatsApp</label><input type="text" id="o-phone" value="${esc(OM.phone)}" placeholder="+880..."></div>
+      <div class="field"><label>Email <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></label><input type="text" id="o-email" value="${esc(OM.email)}" placeholder=""></div>
+      <div class="field"><label>Order Reference</label><input type="text" id="o-ref" value="${esc(OM.ref)}" placeholder="auto-generated"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="row-between" style="flex-wrap:wrap;gap:14px">
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div class="field" style="margin:0;min-width:140px"><label>Discount</label>
+          <input type="number" id="o-disc" value="${OM.discountVal}" min="0" step="0.01" placeholder="0"></div>
+        <div class="field" style="margin:0"><label>Type</label>
+          <select id="o-disc-type">
+            <option value="pct" ${OM.discountType==='pct'?'selected':''}>Percent %</option>
+            <option value="flat" ${OM.discountType==='flat'?'selected':''}>Flat BDT</option>
+          </select></div>
+      </div>
+      <div class="field" style="margin:0;flex:1;min-width:180px"><label>Note <span style="font-weight:400;color:var(--ink-soft)">(printed)</span></label>
+        <input type="text" id="o-note" value="${esc(OM.note)}" placeholder="e.g. 1st purchase discount"></div>
+    </div>
+  </div>
+
+  ${cartCount>0?`
+  <div class="totbar" style="margin-top:18px">
+    <div class="t"><div class="k">Items</div><div class="v num">${cartCount}</div></div>
+    <div class="t"><div class="k">Subtotal</div><div class="v num">${bdt(subtotal)}</div></div>
+    <div class="t"><div class="k">Discount</div><div class="v num">${bdt(calcDiscount(subtotal))}</div></div>
+    <div class="t"><div class="k">Total</div><div class="v num gold">${bdt(subtotal-calcDiscount(subtotal))}</div></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-top:16px">
+    <button class="btn" id="gen-receipt">Generate Receipt →</button>
+  </div>`:`<div style="text-align:center;padding:24px;color:var(--ink-soft);margin-top:18px">
+    Select at least one product above to continue.</div>`}
+  `:''}`;
+}
+
+function calcCart(){
+  let sub=0;const items=[];
+  Object.entries(CART).forEach(([id,qty])=>{
+    if(qty<=0)return;
+    const p=DB.products.find(x=>x.id===id);
+    if(!p)return;
+    items.push({...p,qty,lineTotal:p.sellPrice*qty});
+    sub+=p.sellPrice*qty;
+  });
+  return{subtotal:sub,cartItems:items};
+}
+function calcDiscount(sub){
+  const v=parseFloat(OM.discountVal)||0;
+  return OM.discountType==='pct'?Math.min(sub,sub*v/100):Math.min(sub,v);
+}
+
+function bindInvoice(){
+  const uz=$('#upload-zone'),fi=$('#file-input');
+  if(uz){
+    uz.onclick=()=>fi.click();
+    uz.ondragover=e=>{e.preventDefault();uz.classList.add('drag');};
+    uz.ondragleave=()=>uz.classList.remove('drag');
+    uz.ondrop=e=>{e.preventDefault();uz.classList.remove('drag');handleFile(e.dataTransfer.files[0]);};
+    fi.onchange=()=>handleFile(fi.files[0]);
+  }
+  const cp=$('#clear-products');
+  if(cp)cp.onclick=()=>{DB.products=[];dbSave(DB);CART={};render();};
+  $$('[data-add]').forEach(b=>b.onclick=e=>{e.stopPropagation();CART[b.dataset.add]=(CART[b.dataset.add]||0)+1;render();});
+  $$('[data-plus]').forEach(b=>b.onclick=e=>{e.stopPropagation();CART[b.dataset.plus]=(CART[b.dataset.plus]||0)+1;render();});
+  $$('[data-minus]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.minus;CART[id]=(CART[id]||1)-1;if(CART[id]<=0)delete CART[id];render();});
+  $$('[data-id]').forEach(c=>c.onclick=()=>{const id=c.dataset.id;if(!CART[id]){CART[id]=1;render();}});
+  ['customer','phone','email','ref'].forEach(k=>{const el=$('#o-'+k);if(el)el.oninput=()=>{OM[k]=el.value;};});
+  const od=$('#o-disc'),ot=$('#o-disc-type'),on=$('#o-note');
+  if(od)od.oninput=()=>{OM.discountVal=od.value;updateInvTotals();};
+  if(ot)ot.onchange=()=>{OM.discountType=ot.value;updateInvTotals();};
+  if(on)on.oninput=()=>{OM.note=on.value;};
+  const gr=$('#gen-receipt');if(gr)gr.onclick=generateReceipt;
+}
+function updateInvTotals(){
+  const {subtotal}=calcCart(),disc=calcDiscount(subtotal);
+  const vs=$$('.totbar .v.num');
+  if(vs.length>=4){vs[1].textContent=bdt(subtotal);vs[2].textContent=bdt(disc);vs[3].textContent=bdt(subtotal-disc);}
+}
+
+function handleFile(file){
+  if(!file)return;
+  toast('Reading…');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      let hdr=-1;
+      for(let i=0;i<rows.length;i++){
+        if(String(rows[i][0]).toLowerCase().includes('product')&&String(rows[i][7]).toLowerCase().includes('sell')){hdr=i;break;}
+      }
+      if(hdr===-1){toast('Header row not found. Check your Excel file.',3500);return;}
+      const products=[];
+      for(let i=hdr+1;i<rows.length;i++){
+        const r=rows[i];
+        const name=String(r[0]||'').trim(),sell=parseFloat(r[7]);
+        if(!name||!sell||sell<=0)continue;
+        products.push({id:uid(),name,priceGBP:parseFloat(r[1])||0,weightMl:parseFloat(r[2])||0,
+          totalGBP:parseFloat(r[5])||0,totalBDT:parseFloat(r[6])||0,sellPrice:sell,
+          margin:r[8]?parseFloat(r[8]):null,link:String(r[9]||'').trim()});
+      }
+      if(!products.length){toast('No valid products found.',3500);return;}
+      DB.products=products;dbSave(DB);CART={};toast(`${products.length} products loaded`);render();
+    }catch(err){toast('Error: '+err.message,4000);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function generateReceipt(){
+  const {subtotal,cartItems}=calcCart();
+  if(!cartItems.length){toast('Add products first');return;}
+  ['customer','phone','email','ref'].forEach(k=>{const el=$('#o-'+k);if(el)OM[k]=el.value;});
+  const od=$('#o-disc'),ot=$('#o-disc-type'),on=$('#o-note');
+  if(od)OM.discountVal=od.value;if(ot)OM.discountType=ot.value;if(on)OM.note=on.value;
+  const disc=calcDiscount(subtotal),total=subtotal-disc;
+  const ref=OM.ref||('RCP-'+String(DB.seq).padStart(5,'0'));
+  DB.seq++;
+  const rec={id:uid(),ref,date:Date.now(),customer:OM.customer,phone:OM.phone,
+    email:OM.email,note:OM.note,items:cartItems,subtotal,
+    discountType:OM.discountType,discountVal:parseFloat(OM.discountVal)||0,discount:disc,total};
+  DB.receipts=[rec,...DB.receipts];dbSave(DB);
+  CART={};OM={customer:'',phone:'',email:'',ref:'',discountType:'pct',discountVal:'',note:''};
+  go('#/receipt/'+rec.id);
+}
+
+/* ═══════════════════════════════════════════════════
+   RECEIPT VIEW
+═══════════════════════════════════════════════════ */
+function viewReceipt(id){
+  const rec=DB.receipts.find(r=>r.id===id);
+  if(!rec)return`<div class="card"><p>Receipt not found. <a href="#/orders">View all</a></p></div>`;
+  const rows=rec.items.map(it=>`<tr>
+    <td>${esc(it.name)}</td><td class="r num">${it.qty}</td>
+    <td class="r num">${bdt(it.sellPrice)}</td><td class="r num">${bdt(it.lineTotal)}</td>
+  </tr>`).join('');
+  const dlabel=rec.discountVal?(rec.discountType==='pct'?`${rec.discountVal}% discount`:'Discount'):'Discount';
+  const dnote=rec.note?` — ${esc(rec.note)}`:'';
+  return `<div class="row-between no-print" style="margin-bottom:22px">
+    <a href="#/invoice" class="muted" style="font-size:13px">← New order</a>
+    <div style="display:flex;gap:8px">
+      <a href="#/orders" class="btn ghost sm">All receipts</a>
+      <button class="btn sm" id="print-btn">⬇ Print / PDF</button>
+    </div>
+  </div>
+  <div class="receipt">
+    <div class="receipt-head">
+      <div class="rlogo">L&#x2019;ALLUR&#xC9;E</div>
+      <div class="rtag">Redefining Luxury Beauty</div>
+    </div>
+    <div class="receipt-meta">
+      <div><span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-deep)">Receipt No.</span><b>${esc(rec.ref)}</b></div>
+      <div style="text-align:center"><span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-deep)">Date</span><b>${fmtDate(rec.date)}</b></div>
+      <div style="text-align:right"><span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-deep)">Customer</span>
+        <b>${esc(rec.customer||'—')}</b>${rec.phone?`<span style="display:block;font-size:12px;color:var(--ink-soft)">${esc(rec.phone)}</span>`:''}</div>
+    </div>
+    <div class="receipt-section">
+      <h4>Order Summary</h4>
+      <table><thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    </div>
+    <div class="receipt-totals">
+      <div class="ln"><span>Subtotal</span><span class="num">${bdt(rec.subtotal)}</span></div>
+      <div class="ln"><span>${dlabel}${dnote}</span><span class="num">${rec.discount>0?'− '+bdt(rec.discount):bdt(0)}</span></div>
+      <div class="ln grand"><span>Total</span><span class="num">${bdt(rec.total)}</span></div>
+    </div>
+    <div class="receipt-foot">
+      <div class="ty">Thank you for choosing L&#x2019;ALLUR&#xC9;E.</div>
+      <p>This receipt is your proof of purchase. Please retain it for your records.<br>All sales are final. Contact your L&#x2019;ALLUR&#xC9;E representative for queries.</p>
+    </div>
+    <div class="internal-note no-print">
+      <h4>Internal — hidden when printing</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:18px;font-size:13px">
+        ${rec.items.map(it=>`<div class="stack"><span style="font-weight:500">${esc(it.name.split(':')[0])}</span>
+          <span class="muted">${it.totalBDT?'cost '+bdt(it.totalBDT*it.qty):''}${it.margin?' · '+it.margin+'% margin':''}</span></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+function bindReceipt(){const pb=$('#print-btn');if(pb)pb.onclick=()=>window.print();}
+
+/* ═══════════════════════════════════════════════════
+   ORDERS VIEW
+═══════════════════════════════════════════════════ */
+function viewOrders(){
+  const rows=DB.receipts.map(r=>`<tr>
+    <td><div class="stack"><span style="font-weight:500">${esc(r.ref)}</span>
+      <span class="muted" style="font-size:12px">${r.items.length} item(s)</span></div></td>
+    <td>${esc(r.customer||'—')}</td>
+    <td class="r num">${bdt(r.total)}</td>
+    <td class="r muted" style="font-size:12px">${fmtDate(r.date)}</td>
+    <td class="r"><a href="#/receipt/${r.id}" class="btn ghost sm">View</a></td>
+  </tr>`).join('');
+  return `<div class="page-head row-between">
+    <div><div class="eyebrow">History</div><h1>Past Receipts</h1></div>
+    <a href="#/invoice" class="btn">+ New order</a>
+  </div>
+  <div class="card">
+    ${DB.receipts.length?`<table><thead><tr><th>Receipt</th><th>Customer</th><th class="r">Total</th><th class="r">Date</th><th></th></tr></thead>
+    <tbody>${rows}</tbody></table>`
+    :`<div style="text-align:center;padding:48px 20px;color:var(--ink-soft)">
+      <p>No receipts yet. <a href="#/invoice">Create your first order →</a></p></div>`}
+  </div>`;
+}
 </script>
 </body>
 </html>
